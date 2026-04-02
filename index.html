@@ -3,13 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Poker AI</title>
+<title>Poker AI Analyzer</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;600&display=swap');
-:root {
-  --bg:#0d0d0d; --surface:#161616; --card:#1a1a1a; --border:#252525;
-  --green:#00c853; --green-dim:rgba(0,200,83,0.12); --red:#ff3d3d;
-  --amber:#ffab00; --text:#f0f0f0; --muted:#555; --muted2:#888;
+:root{
+  --bg:#0d0d0d;--surface:#161616;--card:#1a1a1a;--border:#252525;
+  --green:#00c853;--gdim:rgba(0,200,83,0.1);
+  --red:#ff3d3d;--amber:#ffab00;
+  --text:#f0f0f0;--muted:#555;--muted2:#888;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;}
@@ -19,9 +20,7 @@ header{width:100%;max-width:480px;padding:18px 16px 10px;display:flex;align-item
 .subtitle{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;letter-spacing:1px;}
 .main{width:100%;max-width:480px;padding:0 12px;display:flex;flex-direction:column;gap:12px;}
 
-/* tips */
-.tips{background:rgba(0,200,83,0.07);border:1px solid rgba(0,200,83,0.2);border-radius:10px;padding:10px 14px;display:flex;gap:10px;align-items:flex-start;}
-.tips-icon{color:var(--green);font-size:16px;flex-shrink:0;margin-top:1px;}
+.tips{background:rgba(0,200,83,0.07);border:1px solid rgba(0,200,83,0.2);border-radius:10px;padding:10px 14px;}
 .tips-text{font-size:12px;color:#aaa;line-height:1.6;}
 .tips-text b{color:var(--green);font-weight:600;}
 
@@ -47,7 +46,7 @@ header{width:100%;max-width:480px;padding:18px 16px 10px;display:flex;align-item
 .controls{display:flex;align-items:center;justify-content:center;gap:20px;}
 .btn-side{width:44px;height:44px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--muted2);cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.2s;-webkit-appearance:none;}
 .btn-side.show{opacity:1;pointer-events:all;}
-.btn-analyze{border-color:var(--green);color:var(--green);background:var(--green-dim);}
+.btn-analyze{border-color:var(--green);color:var(--green);background:var(--gdim);}
 .btn-shutter{width:70px;height:70px;border-radius:50%;background:#fff;border:3px solid rgba(255,255,255,0.2);box-shadow:0 0 0 5px rgba(255,255,255,0.06);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;-webkit-appearance:none;transition:transform 0.1s;}
 .btn-shutter:active{transform:scale(0.9);}
 .btn-shutter.off{opacity:0.3;pointer-events:none;}
@@ -55,7 +54,12 @@ header{width:100%;max-width:480px;padding:18px 16px 10px;display:flex;align-item
 
 .result{display:none;flex-direction:column;gap:10px;}
 .result.show{display:flex;}
-.result-header{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;padding:0 2px;}
+.sec{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;padding:0 2px;}
+
+.hand-row{display:flex;gap:8px;}
+.hand-card-display{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 14px;flex:1;}
+.hand-label{font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;letter-spacing:0.5px;margin-bottom:4px;}
+.hand-cards{font-size:20px;letter-spacing:3px;}
 
 .stat-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
 .stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 10px 8px;display:flex;flex-direction:column;gap:4px;}
@@ -71,26 +75,18 @@ header{width:100%;max-width:480px;padding:18px 16px 10px;display:flex;align-item
 .win-bar-track{height:8px;background:var(--border);border-radius:4px;overflow:hidden;}
 .win-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--green),#00e676);transition:width 0.8s ease;width:0%;}
 
-.hand-row{display:flex;gap:8px;}
-.hand-card-display{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 14px;flex:1;}
-.hand-label{font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;letter-spacing:0.5px;margin-bottom:4px;}
-.hand-cards{font-size:20px;letter-spacing:3px;}
-
 .analysis-box{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
-.analysis-head{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.analysis-head{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;}
 .analysis-head .tag{font-family:'Space Mono',monospace;font-size:10px;color:var(--green);letter-spacing:1px;text-transform:uppercase;}
 .analysis-head .model{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);}
 .analysis-body{padding:14px;font-size:13.5px;line-height:1.7;color:#ccc;white-space:pre-wrap;max-height:420px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 
-/* raw debug box */
-.raw-box{background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;font-family:'Space Mono',monospace;font-size:11px;color:#888;line-height:1.5;display:none;white-space:pre-wrap;max-height:160px;overflow-y:auto;}
-.raw-box.show{display:block;}
-
 .cursor{display:inline-block;width:2px;height:13px;background:var(--green);margin-left:2px;vertical-align:text-bottom;animation:blink 0.7s step-end infinite;}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
-.err{font-size:12px;color:var(--red);text-align:center;padding:6px;display:none;}
+
+.err{font-size:12px;color:var(--red);text-align:center;padding:10px;display:none;background:rgba(255,61,61,0.08);border:1px solid rgba(255,61,61,0.2);border-radius:8px;}
 .err.show{display:block;}
-.spacer{height:24px;}
+.spacer{height:28px;}
 </style>
 </head>
 <body>
@@ -103,9 +99,8 @@ header{width:100%;max-width:480px;padding:18px 16px 10px;display:flex;align-item
 <div class="main">
 
   <div class="tips">
-    <div class="tips-icon">📷</div>
     <div class="tips-text">
-      <b>Foto-Tipps:</b> Karten flach hinlegen · Gutes Licht · Karte ganz sichtbar · Nah rangehen · Kein Gegenlicht
+      <b>📷 Foto-Tipps:</b> Karten flach hinlegen · Gutes Licht · Nah rangehen · Beide Ecken sichtbar
     </div>
   </div>
 
@@ -137,7 +132,7 @@ header{width:100%;max-width:480px;padding:18px 16px 10px;display:flex;align-item
   <div class="err" id="err"></div>
 
   <div class="result" id="result">
-    <div class="result-header">ERKANNTE KARTEN</div>
+    <div class="sec">ERKANNTE KARTEN</div>
     <div class="hand-row">
       <div class="hand-card-display">
         <div class="hand-label">MEINE HAND</div>
@@ -149,7 +144,7 @@ header{width:100%;max-width:480px;padding:18px 16px 10px;display:flex;align-item
       </div>
     </div>
 
-    <div class="result-header" style="margin-top:2px;">AUSWERTUNG</div>
+    <div class="sec" style="margin-top:2px;">AUSWERTUNG</div>
     <div class="stat-row">
       <div class="stat-card">
         <div class="stat-label">Win %</div>
@@ -176,18 +171,19 @@ header{width:100%;max-width:480px;padding:18px 16px 10px;display:flex;align-item
     <div class="analysis-box">
       <div class="analysis-head">
         <span class="tag">KI Analyse</span>
-        <span class="model">claude-sonnet-4</span>
+        <span class="model">claude-opus</span>
       </div>
       <div class="analysis-body" id="analysisText"></div>
     </div>
-
-    <div class="raw-box" id="rawBox"></div>
   </div>
 
   <div class="spacer"></div>
 </div>
 
 <script>
+// ⚠️ HIER deine Render.com Backend-URL eintragen nach dem Deployment:
+const BACKEND_URL = "https://poker-backend-0klh.onrender.com/analyze";
+
 const video=document.getElementById('video'),canvas=document.getElementById('canvas'),preview=document.getElementById('preview');
 const badge=document.getElementById('badge'),nocam=document.getElementById('nocam'),scan=document.getElementById('scan'),flash=document.getElementById('flash');
 const btnS=document.getElementById('btnS'),btnR=document.getElementById('btnR'),btnA=document.getElementById('btnA');
@@ -197,8 +193,7 @@ const winPct=document.getElementById('winPct'),winSub=document.getElementById('w
 const handStr=document.getElementById('handStr'),handSub=document.getElementById('handSub');
 const oppsVal=document.getElementById('oppsVal');
 const winBarWrap=document.getElementById('winBarWrap'),winBar=document.getElementById('winBar'),winBarPct=document.getElementById('winBarPct');
-const analysisText=document.getElementById('analysisText'),rawBox=document.getElementById('rawBox');
-
+const analysisText=document.getElementById('analysisText');
 let b64=null,mode='live';
 
 function setBadge(t,cls){badge.textContent=t;badge.className='badge '+(cls||'');}
@@ -244,48 +239,8 @@ function resetStats(){
   myHand.textContent='—';board.textContent='—';
   winPct.textContent='—';winPct.className='stat-value green';winSub.textContent='equity';
   handStr.textContent='—';handSub.textContent='—';oppsVal.textContent='—';
-  winBarWrap.style.display='none';winBar.style.width='0%';
-  analysisText.textContent='';rawBox.className='raw-box';rawBox.textContent='';
+  winBarWrap.style.display='none';winBar.style.width='0%';analysisText.textContent='';
 }
-
-const PROMPT=`Du bist ein Poker-Experte mit perfektem Kartensehen. Schaue dir das Bild SEHR genau an.
-
-WICHTIG: Versuche IMMER die Karten zu erkennen, auch wenn das Bild nicht perfekt ist. 
-- Erkenne Wert (A,K,Q,J,T,9,8,7,6,5,4,3,2) und Farbe (♠♥♦♣) jeder Karte
-- Nutze auch teilweise sichtbare Karten, Ecken, Symbole
-- Bei Unsicherheit: gib deine beste Schätzung an mit einem ~ Symbol davor
-
-Erkenne:
-1. MEINE 2 STARTKARTEN (die Karten des Spielers selbst, meist unten im Bild oder separat gehalten)
-2. BOARD (Tischkarten: Flop=3 Karten, Turn=4, River=5 - falls sichtbar)
-3. ANZAHL GEGNER am Tisch (erkennbare Spieler außer dir selbst)
-4. POSITION falls erkennbar
-
-Analysiere dann:
-- GEWINNWAHRSCHEINLICHKEIT % gegen typische Gegner-Ranges
-- HAND STÄRKE: Premium / Stark / Mittel / Schwach / Marginal  
-- EMPFEHLUNG: Raise / Call / Check / Fold + Begründung
-- GEGNER RANGES: was spielen Gegner typischerweise in dieser Situation
-
-Antworte NUR als JSON, kein Text davor/danach:
-{
-  "myHand": "A♠ K♥",
-  "myHandConfidence": "sicher",
-  "board": "J♦ 9♣ 3♥",
-  "boardStage": "Flop",
-  "opponents": 3,
-  "position": "BTN",
-  "winPct": 58,
-  "handStrength": "Stark",
-  "handName": "Top Pair Top Kicker",
-  "action": "Raise",
-  "actionReason": "Top Pair top Kicker gegen Draws und schwächere Aces",
-  "opponentRanges": "Gegner spielen hier typisch: Broadway-Karten, Pocket Pairs 77+, Suited Connectors",
-  "analysis": "Vollständige deutsche Analyse: Hand-Stärke, Board-Textur, Gegner-Ranges, Empfehlung mit Sizing, was du bei Raise/Call/Fold der Gegner tun solltest",
-  "whatISee": "Kurze Beschreibung was ich im Bild sehe falls Karten unklar sind"
-}
-
-Falls KEINE Karten erkennbar: setze myHand auf "Nicht erkennbar" und erkläre in whatISee was das Problem ist (zu dunkel, zu unscharf, kein Kartenspiel sichtbar etc).`;
 
 btnA.addEventListener('click',async()=>{
   if(!b64||mode==='analyzing')return;
@@ -296,43 +251,19 @@ btnA.addEventListener('click',async()=>{
   analysisText.innerHTML='<span class="cursor"></span>';
 
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
+    const res=await fetch(BACKEND_URL,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:1200,
-        messages:[{role:'user',content:[
-          {type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},
-          {type:'text',text:PROMPT}
-        ]}]
-      })
+      body:JSON.stringify({image:b64})
     });
-    if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error?.message||'API Fehler '+res.status);}
-    const data=await res.json();
-    const raw=data.content?.map(x=>x.text||'').join('')||'';
+    if(!res.ok)throw new Error('Backend Fehler '+res.status);
+    const parsed=await res.json();
+    if(parsed.error)throw new Error(parsed.error);
 
-    // show raw for debug if parse fails
-    let parsed;
-    try{
-      const clean=raw.replace(/```json|```/g,'').trim();
-      // extract JSON object
-      const match=clean.match(/\{[\s\S]*\}/);
-      parsed=JSON.parse(match?match[0]:clean);
-    }catch(e){
-      // parse failed — show raw
-      rawBox.textContent='Debug (Raw):\n'+raw;
-      rawBox.className='raw-box show';
-      analysisText.textContent='Konnte Antwort nicht parsen. Rohtext oben sichtbar.';
-      return;
-    }
-
-    // Cards
     myHand.textContent=(parsed.myHand||'—')+(parsed.myHandConfidence==='unsicher'?' ~':'');
-    const hasBoard=parsed.board&&parsed.board!=='null'&&parsed.board!=='—'&&parsed.board!=='';
-    board.textContent=hasBoard?(parsed.board+(parsed.boardStage?' ('+parsed.boardStage+')':'')):'Kein Board';
+    const hasBoard=parsed.board&&parsed.board.length>2;
+    board.textContent=hasBoard?parsed.board+(parsed.boardStage?' ('+parsed.boardStage+')':''):'— Preflop';
 
-    // Win %
     const pct=parseInt(parsed.winPct)||0;
     if(pct>0){
       winPct.textContent=pct+'%';
@@ -342,7 +273,6 @@ btnA.addEventListener('click',async()=>{
       setTimeout(()=>{winBar.style.width=pct+'%';winBarPct.textContent=pct+'%';},100);
     }
 
-    // Hand strength
     if(parsed.handStrength){
       handStr.textContent=parsed.handStrength;
       const s=parsed.handStrength.toLowerCase();
@@ -351,24 +281,18 @@ btnA.addEventListener('click',async()=>{
     }
     oppsVal.textContent=parsed.opponents||'—';
 
-    // Build analysis text
     const action=parsed.action||'';
     const ac=action==='Fold'?'#ff3d3d':action==='Raise'?'#00c853':'#ffab00';
     const ai=action==='Fold'?'✕':action==='Raise'?'↑':'→';
-
     let txt='';
-    if(action) txt+=`<span style="display:inline-block;background:${ac}22;color:${ac};border:1px solid ${ac}44;border-radius:6px;padding:2px 10px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:1px;">${ai} ${action.toUpperCase()}</span>  <span style="font-size:12px;color:#888;">${parsed.actionReason||''}</span>\n\n`;
-    if(parsed.analysis) txt+=parsed.analysis+'\n\n';
-    if(parsed.opponentRanges) txt+=`🎯 Gegner-Ranges: ${parsed.opponentRanges}\n`;
-    if(parsed.whatISee) txt+=`\n👁 Was ich sehe: ${parsed.whatISee}`;
+    if(action)txt+=`<span style="display:inline-block;background:${ac}22;color:${ac};border:1px solid ${ac}44;border-radius:6px;padding:2px 10px;font-family:'Space Mono',monospace;font-size:11px;">${ai} ${action.toUpperCase()}</span>  <span style="font-size:12px;color:#888;">${parsed.actionReason||''}</span>\n\n`;
+    if(parsed.analysis)txt+=parsed.analysis+'\n\n';
+    if(parsed.opponentRanges)txt+='🎯 Gegner-Ranges: '+parsed.opponentRanges+'\n';
+    if(parsed.whatISee)txt+='\n👁 '+parsed.whatISee;
 
-    // typewriter
     analysisText.innerHTML='';
     let i=0;const cur=document.createElement('span');cur.className='cursor';
-    function type(){
-      if(i<txt.length){analysisText.innerHTML=txt.slice(0,++i);analysisText.appendChild(cur);analysisText.scrollTop=9999;setTimeout(type,7);}
-      else cur.remove();
-    }
+    function type(){if(i<txt.length){analysisText.innerHTML=txt.slice(0,++i);analysisText.appendChild(cur);analysisText.scrollTop=9999;setTimeout(type,7);}else cur.remove();}
     type();
 
   }catch(e){
