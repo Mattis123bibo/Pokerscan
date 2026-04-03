@@ -156,13 +156,13 @@ header{width:100%;max-width:500px;padding:18px 16px 10px;display:flex;align-item
 
 <div class="main">
 
-  <div class="srv waking" id="srvBox">
+  <div class="srv" id="srvBox">
     <div class="srv-row">
-      <div class="srv-dot amber" id="srvDot"></div>
-      <div class="srv-text amber" id="srvText">SERVER STARTET...</div>
+      <div class="srv-dot" id="srvDot"></div>
+      <div class="srv-text" id="srvText">SERVER STARTET...</div>
     </div>
     <div class="srv-sub" id="srvSub"></div>
-    <div class="srv-bar"><div class="srv-bar-fill amber" id="srvFill"></div></div>
+    <div class="srv-bar"><div class="srv-bar-fill amber" id="srvFill" style="animation:loading 1.5s ease-in-out infinite;background:var(--amber);"></div></div>
   </div>
 
   <div class="tips">
@@ -306,7 +306,6 @@ function setSrv(dotCls, txtCls, txt, sub, fillCls, boxCls){
 }
 
 async function pingServer(){
-  setSrv('amber','amber','SERVER STARTET...','Erste Analyse dauert ca. 30 Sek.','amber','waking');
   try{
     const r=await fetch(BACKEND_URL.replace('/analyze',''),{method:'GET',cache:'no-cache'});
     if(r.ok){
@@ -318,6 +317,7 @@ async function pingServer(){
     setSrv('red','red','SERVER NICHT ERREICHBAR','Internetverbindung prüfen','','offline');
   }
 }
+setSrv("amber","amber","SERVER STARTET...","Erste Analyse dauert ca. 30 Sek.","amber","waking");
 pingServer();
 setInterval(pingServer, 4*60*1000);
 
@@ -494,5 +494,4 @@ function openPicker(type,idx){
   modalTitle.textContent=type==='hole'?`HOLE CARD ${idx+1}`:`BOARD KARTE ${idx+1}`;
   updateSuitTabs();renderValGrid();modalBg.classList.add('show');
 }
-function updateSuitTabs(){
-  document.querySelectorAll('.suit-t
+functio
