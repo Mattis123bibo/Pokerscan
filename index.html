@@ -428,8 +428,6 @@ function renderAnalysisText(p){
   let txt='';
   if(action)txt+=`<span style="display:inline-block;background:${ac}22;color:${ac};border:1px solid ${ac}44;border-radius:6px;padding:2px 10px;font-family:'Space Mono',monospace;font-size:11px;">${ai} ${action.toUpperCase()}</span>  <span style="font-size:12px;color:#888;">${p.actionReason||''}</span>\n\n`;
   if(p.sizing)txt+=`📐 Sizing: ${p.sizing}\n\n`;
-  if(p.isNuts===true)txt+=`<span style="background:#00c85322;color:#00c853;border:1px solid #00c85344;border-radius:6px;padding:2px 10px;font-family:'Space Mono',monospace;font-size:11px;">★ NUTS</span>\n\n`;
-  if(p.isNuts===false&&p.nutsDescription)txt+=`⚠️ Nicht Nuts: ${p.nutsDescription}\n\n`;
   if(p.boardTexture)txt+=`🎰 Board: ${p.boardTexture}\n\n`;
   if(p.analysis)txt+=p.analysis+'\n\n';
   if(p.opponentRanges)txt+='🎯 '+p.opponentRanges;
@@ -498,41 +496,4 @@ function openPicker(type,idx){
 }
 function updateSuitTabs(){
   document.querySelectorAll('.suit-tab').forEach(t=>{
-    const s=t.dataset.suit;
-    const cls=s==='♠'?'s':s==='♥'?'h':s==='♦'?'d':'c';
-    t.className='suit-tab '+cls+(s===activeSuit?' active':'');
-  });
-}
-function renderValGrid(){
-  const used=getAllUsed(currentEditTarget);
-  valGrid.innerHTML='';
-  VALS.forEach(v=>{
-    const card=v+activeSuit;
-    const btn=document.createElement('button');
-    btn.className='val-btn'+(used.has(card)?' used':'');
-    btn.type='button';btn.textContent=v;
-    btn.onclick=()=>{
-      if(currentEditTarget.type==='hole')holeCards[currentEditTarget.idx]=card;
-      else boardCards[currentEditTarget.idx]=card;
-      closePicker();renderEditor();
-    };
-    valGrid.appendChild(btn);
-  });
-}
-document.querySelectorAll('.suit-tab').forEach(t=>{
-  t.onclick=()=>{activeSuit=t.dataset.suit;updateSuitTabs();renderValGrid();};
-});
-clearCardBtn.onclick=()=>{
-  if(!currentEditTarget)return;
-  if(currentEditTarget.type==='hole')holeCards[currentEditTarget.idx]=null;
-  else boardCards.splice(currentEditTarget.idx,1);
-  closePicker();renderEditor();
-};
-modalClose.onclick=closePicker;
-modalBg.onclick=(e)=>{if(e.target===modalBg)closePicker();};
-function closePicker(){modalBg.classList.remove('show');currentEditTarget=null;}
-
-startCam();
-</script>
-</body>
-</html>
+    const s=t.
