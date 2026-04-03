@@ -293,7 +293,7 @@ function showErr(m){errEl.textContent=m;errEl.className='err show';setTimeout(()
 // Server status
 async function pingServer(){
   try{
-    const r = await fetch(BACKEND_URL.replace('/analyze',''), {method:'GET'});
+    const r = await fetch(BACKEND_URL.replace('/analyze','/'), {method:'GET', mode:'cors'});
     if(r.ok){
       srvDot.className='srv-dot green';
       srvText.className='srv-text green';
@@ -516,5 +516,4 @@ function getAllUsed(exclude){
 }
 
 function openPicker(type,idx){
-  currentEditTarget={type,idx}; activeSuit='♠';
-  moda
+  currentEditTarget={type,idx}; activeSu
