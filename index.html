@@ -293,27 +293,22 @@ function showErr(m){errEl.textContent=m;errEl.className='err show';setTimeout(()
 // Server status
 async function pingServer(){
   try{
-    const r = await fetch(BACKEND_URL.replace('/analyze','/'), {method:'GET', mode:'cors'});
-    if(r.ok){
-      srvDot.className='srv-dot green';
-      srvText.className='srv-text green';
-      srvText.textContent='✓ SERVER BEREIT';
-      srvSub.textContent='Analyse kann sofort starten';
-      srvFill.className='srv-bar-fill green';
-      srvBox.className='srv ready';
-    } else {
-      srvDot.className='srv-dot red';
-      srvText.className='srv-text red';
-      srvText.textContent='SERVER OFFLINE';
-      srvSub.textContent='Bitte später nochmal versuchen';
-      srvFill.className='srv-bar-fill red';
-      srvBox.className='srv offline';
-    }
+    const r = await fetch(BACKEND_URL, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({image:'ping'})
+    });
+    srvDot.className='srv-dot green';
+    srvText.className='srv-text green';
+    srvText.textContent='✓ SERVER BEREIT';
+    srvSub.textContent='Analyse kann sofort starten';
+    srvFill.className='srv-bar-fill green';
+    srvBox.className='srv ready';
   } catch(e){
     srvDot.className='srv-dot red';
     srvText.className='srv-text red';
     srvText.textContent='SERVER NICHT ERREICHBAR';
-    srvSub.textContent='Internetverbindung prüfen';
+    srvSub.textContent='Bitte Seite neu laden';
     srvFill.className='srv-bar-fill red';
     srvBox.className='srv offline';
   }
@@ -516,4 +511,9 @@ function getAllUsed(exclude){
 }
 
 function openPicker(type,idx){
-  currentEditTarget={type,idx}; activeSu
+  currentEditTarget={type,idx}; activeSuit='♠';
+  modalTitle.textContent=type==='hole'?`HOLE CARD ${idx+1}`:`BOARD KARTE ${idx+1}`;
+  updateSuitTabs(); renderValGrid(); modalBg.classList.add('show');
+}
+function updateSuitTabs(){
+  document.querySelectorAll('.suit-tab').forEach(t=>{
