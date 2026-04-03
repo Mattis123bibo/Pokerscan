@@ -20,23 +20,7 @@ header{width:100%;max-width:500px;padding:18px 16px 10px;display:flex;align-item
 .subtitle{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;letter-spacing:1px;}
 .main{width:100%;max-width:500px;padding:0 12px;display:flex;flex-direction:column;gap:12px;}
 
-.srv{display:flex;flex-direction:column;gap:6px;padding:12px 16px;border-radius:12px;border:1px solid rgba(255,171,0,0.35);background:rgba(255,171,0,0.08);}
-.srv.ready{background:rgba(0,200,83,0.08);border-color:rgba(0,200,83,0.35);}
-.srv.offline{background:rgba(255,61,61,0.08);border-color:rgba(255,61,61,0.25);}
-.srv-row{display:flex;align-items:center;gap:10px;}
-.srv-dot{width:12px;height:12px;border-radius:50%;background:var(--amber);box-shadow:0 0 8px rgba(255,171,0,0.5);animation:blink 0.8s ease-in-out infinite;flex-shrink:0;}
-.srv-dot.green{background:var(--green);box-shadow:0 0 8px rgba(0,200,83,0.5);animation:none;}
-.srv-dot.red{background:var(--red);box-shadow:none;animation:none;}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
-.srv-text{font-family:'Space Mono',monospace;font-size:12px;letter-spacing:1px;font-weight:700;color:var(--amber);flex:1;}
-.srv-text.green{color:var(--green);}
-.srv-text.red{color:var(--red);}
-.srv-sub{font-size:11px;color:var(--muted2);padding-left:22px;}
-.srv-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
-.srv-bar-fill{height:100%;border-radius:2px;background:var(--amber);animation:loading 1.5s ease-in-out infinite;}
-.srv-bar-fill.green{background:var(--green);width:100%;animation:none;}
-.srv-bar-fill.red{background:var(--red);width:100%;animation:none;}
-@keyframes loading{0%{width:5%;margin-left:0%}50%{width:60%;margin-left:20%}100%{width:5%;margin-left:90%}}
+50%{width:60%;margin-left:20%}100%{width:5%;margin-left:90%}}
 
 .tips{background:rgba(0,200,83,0.07);border:1px solid rgba(0,200,83,0.2);border-radius:10px;padding:10px 14px;}
 .tips-text{font-size:12px;color:#aaa;line-height:1.6;}
@@ -150,14 +134,7 @@ header{width:100%;max-width:500px;padding:18px 16px 10px;display:flex;align-item
 
 <div class="main">
 
-  <div class="srv" id="srvBox">
-    <div class="srv-row">
-      <div class="srv-dot" id="srvDot"></div>
-      <div class="srv-text" id="srvText">SERVER STARTET...</div>
-    </div>
-    <div class="srv-sub" id="srvSub">Erste Analyse dauert ca. 30 Sek.</div>
-    <div class="srv-bar"><div class="srv-bar-fill" id="srvFill"></div></div>
-  </div>
+
 
   <div class="tips">
     <div class="tips-text"><b>📷 Tipps:</b> Handy so hoch wie möglich halten · Alle Karten sichtbar · Eigene Karten vorne · Helles Licht · Nach Analyse: Karten antippen zum Korrigieren</div>
@@ -285,21 +262,12 @@ const winBarWrap=document.getElementById('winBarWrap'),winBar=document.getElemen
 const analysisText=document.getElementById('analysisText'),analysisTag=document.getElementById('analysisTag');
 const modalBg=document.getElementById('modalBg'),modalClose=document.getElementById('modalClose');
 const modalTitle=document.getElementById('modalTitle'),valGrid=document.getElementById('valGrid'),clearCardBtn=document.getElementById('clearCardBtn');
-const srvBox=document.getElementById('srvBox'),srvDot=document.getElementById('srvDot'),srvText=document.getElementById('srvText'),srvSub=document.getElementById('srvSub'),srvFill=document.getElementById('srvFill');
+
 
 function setBadge(t,cls){badge.textContent=t;badge.className='badge '+(cls||'');}
 function showErr(m){errEl.textContent=m;errEl.className='err show';setTimeout(()=>errEl.className='err',6000);}
 
-// Server status
-// Server status update after successful analysis
-function setServerReady(){
-  srvDot.className='srv-dot green';
-  srvText.className='srv-text green';
-  srvText.textContent='✓ SERVER BEREIT';
-  srvSub.textContent='Analyse kann sofort starten';
-  srvFill.className='srv-bar-fill green';
-  srvBox.className='srv ready';
-}
+
 
 // Camera
 async function startCam(){
@@ -383,7 +351,6 @@ async function runAnalysis(body, isImageScan){
       opponents=parseInt(parsed.opponents)||1;
     }
 
-    setServerReady();
     renderEditor();
     renderStats(parsed);
     renderAnalysisText(parsed);
@@ -515,4 +482,29 @@ function renderValGrid(){
     const card=v+activeSuit;
     const btn=document.createElement('button');
     btn.className='val-btn'+(used.has(card)?' used':'');
-    btn.type='button'; btn.t
+    btn.type='button'; btn.textContent=v;
+    btn.onclick=()=>{
+      if(currentEditTarget.type==='hole') holeCards[currentEditTarget.idx]=card;
+      else boardCards[currentEditTarget.idx]=card;
+      closePicker(); renderEditor();
+    };
+    valGrid.appendChild(btn);
+  });
+}
+document.querySelectorAll('.suit-tab').forEach(t=>{
+  t.onclick=()=>{activeSuit=t.dataset.suit;updateSuitTabs();renderValGrid();};
+});
+clearCardBtn.onclick=()=>{
+  if(!currentEditTarget)return;
+  if(currentEditTarget.type==='hole') holeCards[currentEditTarget.idx]=null;
+  else boardCards.splice(currentEditTarget.idx,1);
+  closePicker(); renderEditor();
+};
+modalClose.onclick=closePicker;
+modalBg.onclick=(e)=>{if(e.target===modalBg)closePicker();};
+function closePicker(){modalBg.classList.remove('show');currentEditTarget=null;}
+
+startCam();
+</script>
+</body>
+</html>
