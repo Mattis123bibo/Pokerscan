@@ -291,30 +291,15 @@ function setBadge(t,cls){badge.textContent=t;badge.className='badge '+(cls||'');
 function showErr(m){errEl.textContent=m;errEl.className='err show';setTimeout(()=>errEl.className='err',6000);}
 
 // Server status
-async function pingServer(){
-  try{
-    const r = await fetch(BACKEND_URL, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({image:'ping'})
-    });
-    srvDot.className='srv-dot green';
-    srvText.className='srv-text green';
-    srvText.textContent='✓ SERVER BEREIT';
-    srvSub.textContent='Analyse kann sofort starten';
-    srvFill.className='srv-bar-fill green';
-    srvBox.className='srv ready';
-  } catch(e){
-    srvDot.className='srv-dot red';
-    srvText.className='srv-text red';
-    srvText.textContent='SERVER NICHT ERREICHBAR';
-    srvSub.textContent='Bitte Seite neu laden';
-    srvFill.className='srv-bar-fill red';
-    srvBox.className='srv offline';
-  }
+// Server status update after successful analysis
+function setServerReady(){
+  srvDot.className='srv-dot green';
+  srvText.className='srv-text green';
+  srvText.textContent='✓ SERVER BEREIT';
+  srvSub.textContent='Analyse kann sofort starten';
+  srvFill.className='srv-bar-fill green';
+  srvBox.className='srv ready';
 }
-pingServer();
-setInterval(pingServer, 4*60*1000);
 
 // Camera
 async function startCam(){
@@ -398,6 +383,7 @@ async function runAnalysis(body, isImageScan){
       opponents=parseInt(parsed.opponents)||1;
     }
 
+    setServerReady();
     renderEditor();
     renderStats(parsed);
     renderAnalysisText(parsed);
@@ -517,3 +503,16 @@ function openPicker(type,idx){
 }
 function updateSuitTabs(){
   document.querySelectorAll('.suit-tab').forEach(t=>{
+    const s=t.dataset.suit;
+    const cls=s==='♠'?'s':s==='♥'?'h':s==='♦'?'d':'c';
+    t.className='suit-tab '+cls+(s===activeSuit?' active':'');
+  });
+}
+function renderValGrid(){
+  const used=getAllUsed(currentEditTarget);
+  valGrid.innerHTML='';
+  VALS.forEach(v=>{
+    const card=v+activeSuit;
+    const btn=document.createElement('button');
+    btn.className='val-btn'+(used.has(card)?' used':'');
+    btn.type='button'; btn.t
