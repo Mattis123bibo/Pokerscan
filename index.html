@@ -19,6 +19,13 @@ header{width:100%;max-width:500px;padding:18px 16px 10px;display:flex;align-item
 .logo span{color:var(--muted);}
 .subtitle{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;letter-spacing:1px;}
 .main{width:100%;max-width:500px;padding:0 12px;display:flex;flex-direction:column;gap:12px;}
+.srv-simple{display:flex;align-items:center;gap:8px;padding:6px 0;}
+.srv-simple-dot{width:8px;height:8px;border-radius:50%;background:var(--amber);flex-shrink:0;}
+.srv-simple-dot.green{background:var(--green);animation:none;}
+.srv-simple-dot.red{background:var(--red);animation:none;}
+.srv-simple-dot.amber{background:var(--amber);animation:blink-s 0.8s ease-in-out infinite;}
+@keyframes blink-s{0%,100%{opacity:1}50%{opacity:0.2}}
+.srv-simple-text{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;}
 
 50%{width:60%;margin-left:20%}100%{width:5%;margin-left:90%}}
 
@@ -135,6 +142,11 @@ header{width:100%;max-width:500px;padding:18px 16px 10px;display:flex;align-item
 <div class="main">
 
 
+
+  <div class="srv-simple">
+    <div class="srv-simple-dot amber" id="sDot"></div>
+    <div class="srv-simple-text" id="sText">SUCHT VERBINDUNG...</div>
+  </div>
 
   <div class="tips">
     <div class="tips-text"><b>📷 Tipps:</b> Handy so hoch wie möglich halten · Alle Karten sichtbar · Eigene Karten vorne · Helles Licht · Nach Analyse: Karten antippen zum Korrigieren</div>
@@ -268,6 +280,22 @@ function setBadge(t,cls){badge.textContent=t;badge.className='badge '+(cls||'');
 function showErr(m){errEl.textContent=m;errEl.className='err show';setTimeout(()=>errEl.className='err',6000);}
 
 
+
+// Simple server status
+const sDot = document.getElementById('sDot');
+const sText = document.getElementById('sText');
+async function checkServer(){
+  try{
+    await fetch(BACKEND_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({image:'ping'})});
+    sDot.className='srv-simple-dot green';
+    sText.textContent='BEREIT';
+  } catch(e){
+    sDot.className='srv-simple-dot red';
+    sText.textContent='OFFLINE';
+  }
+}
+checkServer();
+setInterval(checkServer, 4*60*1000);
 
 // Camera
 async function startCam(){
@@ -471,40 +499,4 @@ function openPicker(type,idx){
 function updateSuitTabs(){
   document.querySelectorAll('.suit-tab').forEach(t=>{
     const s=t.dataset.suit;
-    const cls=s==='♠'?'s':s==='♥'?'h':s==='♦'?'d':'c';
-    t.className='suit-tab '+cls+(s===activeSuit?' active':'');
-  });
-}
-function renderValGrid(){
-  const used=getAllUsed(currentEditTarget);
-  valGrid.innerHTML='';
-  VALS.forEach(v=>{
-    const card=v+activeSuit;
-    const btn=document.createElement('button');
-    btn.className='val-btn'+(used.has(card)?' used':'');
-    btn.type='button'; btn.textContent=v;
-    btn.onclick=()=>{
-      if(currentEditTarget.type==='hole') holeCards[currentEditTarget.idx]=card;
-      else boardCards[currentEditTarget.idx]=card;
-      closePicker(); renderEditor();
-    };
-    valGrid.appendChild(btn);
-  });
-}
-document.querySelectorAll('.suit-tab').forEach(t=>{
-  t.onclick=()=>{activeSuit=t.dataset.suit;updateSuitTabs();renderValGrid();};
-});
-clearCardBtn.onclick=()=>{
-  if(!currentEditTarget)return;
-  if(currentEditTarget.type==='hole') holeCards[currentEditTarget.idx]=null;
-  else boardCards.splice(currentEditTarget.idx,1);
-  closePicker(); renderEditor();
-};
-modalClose.onclick=closePicker;
-modalBg.onclick=(e)=>{if(e.target===modalBg)closePicker();};
-function closePicker(){modalBg.classList.remove('show');currentEditTarget=null;}
-
-startCam();
-</script>
-</body>
-</html>
+    const cls=s=
