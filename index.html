@@ -102,6 +102,10 @@ header{width:100%;max-width:500px;padding:18px 16px 10px;display:flex;align-item
 .recalc-btn{width:100%;padding:14px;border-radius:10px;border:none;background:var(--green);color:#000;font-family:'Space Mono',monospace;font-size:12px;font-weight:700;letter-spacing:2px;cursor:pointer;-webkit-appearance:none;transition:all 0.15s;}
 .recalc-btn:active{transform:scale(0.97);}
 .recalc-btn:disabled{opacity:0.3;pointer-events:none;}
+.recalc-progress{height:3px;background:var(--border);border-radius:2px;overflow:hidden;display:none;margin-top:-8px;}
+.recalc-progress.show{display:block;}
+.recalc-progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--green),#00e676);border-radius:2px;animation:recalc-run 2.5s ease-in-out infinite;}
+@keyframes recalc-run{0%{width:0%;margin-left:0%}50%{width:60%;margin-left:20%}100%{width:0%;margin-left:100%}}
 
 /* Results */
 .result{display:none;flex-direction:column;gap:10px;}
@@ -214,6 +218,7 @@ header{width:100%;max-width:500px;padding:18px 16px 10px;display:flex;align-item
       <div class="opp-btns" id="oppBtns"></div>
     </div>
     <button class="recalc-btn" id="recalcBtn" type="button">↻ NEU BERECHNEN</button>
+    <div class="recalc-progress" id="recalcProgress"><div class="recalc-progress-fill"></div></div>
   </div>
 
   <!-- Results -->
@@ -414,7 +419,7 @@ async function runAnalysis(body, isImageScan){
   scan.classList.add('on');
   btnA.style.opacity='0.3';btnA.style.pointerEvents='none';
   btnR.style.opacity='0.3';btnR.style.pointerEvents='none';
-  recalcBtn.disabled=true;
+  recalcBtn.disabled=true;document.getElementById('recalcProgress').classList.add('show');
   analysisText.innerHTML='<span class="cursor"></span>';
   result.classList.add('show');
   analysisTag.textContent = isImageScan ? 'KI SCAN' : 'NEU BERECHNET';
@@ -450,7 +455,7 @@ async function runAnalysis(body, isImageScan){
     mode='captured';setBadge('AUFGENOMMEN');scan.classList.remove('on');
     btnA.style.opacity='';btnA.style.pointerEvents='';
     btnR.style.opacity='';btnR.style.pointerEvents='';
-    recalcBtn.disabled=false;
+    recalcBtn.disabled=false;document.getElementById('recalcProgress').classList.remove('show');
   }
 }
 
@@ -512,94 +517,4 @@ function renderEditor(){
 
   boardCards.forEach((c,i)=>{
     const wrap=document.createElement('div');
-    wrap.style.cssText='position:relative;display:inline-block;';
-    const chip=document.createElement('div');
-    chip.className='card-chip '+(c?cardColor(c):'empty');
-    chip.textContent=c||'?';
-    chip.onclick=()=>openPicker('board',i);
-    const rm=document.createElement('div');
-    rm.className='remove-card-btn';rm.textContent='✕';
-    rm.onclick=(e)=>{e.stopPropagation();boardCards.splice(i,1);renderEditor();};
-    wrap.appendChild(chip);wrap.appendChild(rm);
-    boardRow.appendChild(wrap);
-  });
-
-  if(boardCards.length<5){
-    const addBtn=document.createElement('button');
-    addBtn.className='add-card-btn';addBtn.type='button';
-    addBtn.textContent='+ Karte';
-    addBtn.onclick=()=>{boardCards.push(null);renderEditor();openPicker('board',boardCards.length-1);};
-    boardRow.appendChild(addBtn);
-  }
-
-  // Opponents
-  oppBtns.innerHTML='';
-  [1,2,3,4,5,6,7,8].forEach(n=>{
-    const b=document.createElement('button');
-    b.className='opp-btn'+(opponents===n?' active':'');
-    b.type='button';b.textContent=n;
-    b.onclick=()=>{opponents=n;renderEditor();};
-    oppBtns.appendChild(b);
-  });
-}
-
-// ── Picker Modal ──
-function getAllUsed(excludeTarget){
-  const used=new Set();
-  holeCards.forEach((c,i)=>{if(c&&!(excludeTarget&&excludeTarget.type==='hole'&&excludeTarget.idx===i))used.add(c);});
-  boardCards.forEach((c,i)=>{if(c&&!(excludeTarget&&excludeTarget.type==='board'&&excludeTarget.idx===i))used.add(c);});
-  return used;
-}
-
-function openPicker(type,idx){
-  currentEditTarget={type,idx};
-  activeSuit='♠';
-  modalTitle.textContent=type==='hole'?`HOLE CARD ${idx+1}`:`BOARD KARTE ${idx+1}`;
-  updateSuitTabs();renderValGrid();
-  modalBg.classList.add('show');
-}
-
-function updateSuitTabs(){
-  document.querySelectorAll('.suit-tab').forEach(t=>{
-    const s=t.dataset.suit;
-    const cls=s==='♠'?'s':s==='♥'?'h':s==='♦'?'d':'c';
-    t.className='suit-tab '+cls+(s===activeSuit?' active':'');
-  });
-}
-
-function renderValGrid(){
-  const used=getAllUsed(currentEditTarget);
-  valGrid.innerHTML='';
-  VALS.forEach(v=>{
-    const card=v+activeSuit;
-    const btn=document.createElement('button');
-    btn.className='val-btn'+(used.has(card)?' used':'');
-    btn.type='button';btn.textContent=v;
-    btn.onclick=()=>{
-      if(currentEditTarget.type==='hole'){holeCards[currentEditTarget.idx]=card;}
-      else{boardCards[currentEditTarget.idx]=card;}
-      closePicker();renderEditor();
-    };
-    valGrid.appendChild(btn);
-  });
-}
-
-document.querySelectorAll('.suit-tab').forEach(t=>{
-  t.onclick=()=>{activeSuit=t.dataset.suit;updateSuitTabs();renderValGrid();};
-});
-
-clearCardBtn.onclick=()=>{
-  if(!currentEditTarget)return;
-  if(currentEditTarget.type==='hole'){holeCards[currentEditTarget.idx]=null;}
-  else{boardCards.splice(currentEditTarget.idx,1);}
-  closePicker();renderEditor();
-};
-
-modalClose.onclick=closePicker;
-modalBg.onclick=(e)=>{if(e.target===modalBg)closePicker();};
-function closePicker(){modalBg.classList.remove('show');currentEditTarget=null;}
-
-startCam();
-</script>
-</body>
-</html>
+    wrap.style.cssText='position:relative;display:inline-blo
