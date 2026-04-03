@@ -156,13 +156,13 @@ header{width:100%;max-width:500px;padding:18px 16px 10px;display:flex;align-item
 
 <div class="main">
 
-  <div class="srv" id="srvBox">
+  <div class="srv waking" id="srvBox">
     <div class="srv-row">
-      <div class="srv-dot" id="srvDot"></div>
-      <div class="srv-text gray" id="srvText">SERVER WIRD GEPRÜFT...</div>
+      <div class="srv-dot amber" id="srvDot"></div>
+      <div class="srv-text amber" id="srvText">SERVER STARTET...</div>
     </div>
     <div class="srv-sub" id="srvSub"></div>
-    <div class="srv-bar"><div class="srv-bar-fill" id="srvFill"></div></div>
+    <div class="srv-bar"><div class="srv-bar-fill amber" id="srvFill"></div></div>
   </div>
 
   <div class="tips">
@@ -308,7 +308,7 @@ function setSrv(dotCls, txtCls, txt, sub, fillCls, boxCls){
 async function pingServer(){
   setSrv('amber','amber','SERVER STARTET...','Erste Analyse dauert ca. 30 Sek.','amber','waking');
   try{
-    const r=await fetch(BACKEND_URL.replace('/analyze',''),{method:'GET'});
+    const r=await fetch(BACKEND_URL.replace('/analyze',''),{method:'GET',cache:'no-cache'});
     if(r.ok){
       setSrv('green','green','✓ SERVER BEREIT','Analyse kann sofort starten','green','ready');
     } else {
@@ -495,5 +495,4 @@ function openPicker(type,idx){
   updateSuitTabs();renderValGrid();modalBg.classList.add('show');
 }
 function updateSuitTabs(){
-  document.querySelectorAll('.suit-tab').forEach(t=>{
-    const s=t.
+  document.querySelectorAll('.suit-t
