@@ -306,7 +306,7 @@ const analysisText=document.getElementById('analysisText'),analysisTag=document.
 const modalBg=document.getElementById('modalBg'),modalClose=document.getElementById('modalClose');
 const modalTitle=document.getElementById('modalTitle'),valGrid=document.getElementById('valGrid');
 const clearCardBtn=document.getElementById('clearCardBtn');
-const statusDot=document.getElementById('statusDot'),statusText=document.getElementById('statusText');
+const statusDot=document.getElementById('statusDot'),statusText=document.getElementById('statusText'),statusSub2=document.getElementById('statusSub'),statusBarFill2=document.getElementById('statusBarFill'),serverStatus2=document.getElementById('serverStatus');
 
 function setBadge(t,cls){badge.textContent=t;badge.className='badge '+(cls||'');}
 function showErr(m){errEl.textContent=m;errEl.className='err show';setTimeout(()=>errEl.className='err',6000);}
@@ -316,34 +316,24 @@ const serverStatus=document.getElementById('serverStatus');
 const statusBarFill=document.getElementById('statusBarFill');
 const statusSub=document.getElementById('statusSub');
 
+function setStatus(dot, textCls, txt, sub, barCls, boxCls){
+  if(statusDot) statusDot.className='status-dot '+dot;
+  if(statusText){statusText.className='status-text '+textCls;statusText.textContent=txt;}
+  const s=document.getElementById('statusSub'); if(s) s.textContent=sub;
+  const b=document.getElementById('statusBarFill'); if(b) b.className='status-bar-fill '+barCls;
+  const box=document.getElementById('serverStatus'); if(box) box.className='server-status '+boxCls;
+}
 async function pingServer(){
   try{
-    statusDot.className='status-dot amber';
-    statusText.className='status-text amber';
-    statusText.textContent='SERVER STARTET...';
-    statusSub.textContent='Erste Analyse dauert ca. 30 Sek.';
-    statusBarFill.className='status-bar-fill amber';
-    serverStatus.className='server-status waking';
+    setStatus('amber','amber','SERVER STARTET...','Erste Analyse dauert ca. 30 Sek.','amber','waking');
     const r=await fetch(BACKEND_URL.replace('/analyze',''),{method:'GET'});
     if(r.ok){
-      statusDot.className='status-dot green';
-      statusText.className='status-text green';
-      statusText.textContent='✓ SERVER BEREIT';
-      statusSub.textContent='Analyse kann sofort starten';
-      statusBarFill.className='status-bar-fill green';
-      serverStatus.className='server-status ready';
+      setStatus('green','green','✓ SERVER BEREIT','Analyse kann sofort starten','green','ready');
     } else {
-      statusDot.className='status-dot red';
-      statusText.className='status-text red';
-      statusText.textContent='SERVER OFFLINE';
-      statusSub.textContent='Bitte später nochmal versuchen';
-      statusBarFill.className='status-bar-fill';
-      serverStatus.className='server-status offline';
+      setStatus('red','red','SERVER OFFLINE','Bitte später nochmal versuchen','','offline');
     }
   }catch(e){
-    statusDot.className='status-dot red';
-    statusText.className='status-text red';
-    statusText.textContent='SERVER NICHT ERREICHBAR';
+    setStatus('red','red','SERVER NICHT ERREICHBAR','Internetverbindung prüfen','','offline');
     statusSub.textContent='Internetverbindung prüfen';
     statusBarFill.className='status-bar-fill';
     serverStatus.className='server-status offline';
@@ -517,4 +507,5 @@ function renderEditor(){
 
   boardCards.forEach((c,i)=>{
     const wrap=document.createElement('div');
-    wrap.style.cssText='position:relative;display:inline-blo
+    wrap.style.cssText='position:relative;display:inline-block;';
+    const chip=document
