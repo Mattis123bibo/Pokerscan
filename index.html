@@ -441,6 +441,9 @@ function renderAnalysisText(parsed){
   let txt='';
   if(action)txt+=`<span style="display:inline-block;background:${ac}22;color:${ac};border:1px solid ${ac}44;border-radius:6px;padding:2px 10px;font-family:'Space Mono',monospace;font-size:11px;">${ai} ${action.toUpperCase()}</span>  <span style="font-size:12px;color:#888;">${parsed.actionReason||''}</span>\n\n`;
   if(parsed.sizing)txt+=`📐 Sizing: ${parsed.sizing}\n\n`;
+  if(parsed.isNuts===true)txt+=`<span style="background:#00c85322;color:#00c853;border:1px solid #00c85344;border-radius:6px;padding:2px 10px;font-family:'Space Mono',monospace;font-size:11px;">★ NUTS</span>\n\n`;
+  if(parsed.isNuts===false&&parsed.nutsDescription)txt+=`⚠️ Nicht Nuts: ${parsed.nutsDescription}\n\n`;
+  if(parsed.boardTexture)txt+=`🎰 Board: ${parsed.boardTexture}\n\n`;
   if(parsed.analysis)txt+=parsed.analysis+'\n\n';
   if(parsed.opponentRanges)txt+='🎯 '+parsed.opponentRanges;
   analysisText.innerHTML='';
