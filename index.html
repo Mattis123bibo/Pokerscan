@@ -344,9 +344,15 @@ btnA.addEventListener('click',()=>runAnalysis({image:b64},true));
 recalcBtn.addEventListener('click',()=>{
   if(mode==='analyzing')return;
   const myHandStr=holeCards.filter(Boolean).join(' ');
-  const boardStr=boardCards.filter(Boolean).join(' ');
-  if(!myHandStr){showErr('Bitte zuerst Hole Cards eintragen!');return;}
-  const stage={0:'Preflop',3:'Flop',4:'Turn',5:'River'}[boardCards.filter(Boolean).length]||'Flop';
+  const validBoard=boardCards.filter(Boolean);
+  const boardCount=validBoard.length;
+
+  // Validierung
+  if(!holeCards[0]||!holeCards[1]){showErr('Hole Cards unvollständig — bitte beide Karten eintragen!');return;}
+  if(boardCount===1||boardCount===2){showErr('Ungültige Kartenanzahl — Board braucht 0 (Preflop), 3 (Flop), 4 (Turn) oder 5 (River) Karten!');return;}
+
+  const boardStr=validBoard.join(' ');
+  const stage={0:'Preflop',3:'Flop',4:'Turn',5:'River'}[boardCount]||'Flop';
   runAnalysis({image:b64,override:{myHand:myHandStr,board:boardStr,opponents:opponents,boardStage:stage}},false);
 });
 
