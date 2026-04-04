@@ -360,6 +360,12 @@ async function runAnalysis(body, isImageScan){
   analysisText.innerHTML='<span class="cursor"></span>';
   result.classList.add('show');
   analysisTag.textContent=isImageScan?'KI SCAN':'NEU BERECHNET';
+  // Reset all stats before new analysis
+  winPct.textContent='—'; winPct.className='stat-value green';
+  winSub.textContent='equity';
+  handStr.textContent='—'; handSub.textContent='—';
+  oppsVal.textContent='—';
+  winBarWrap.style.display='none'; winBar.style.width='0%'; winBarPct.textContent='0%';
 
   try{
     const res=await fetch(BACKEND_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
