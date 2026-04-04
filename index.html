@@ -321,6 +321,13 @@ btnS.addEventListener('click',()=>{
   preview.src=url; preview.style.display='block'; video.style.display='none';
   mode='captured'; setBadge('AUFGENOMMEN');
   btnR.classList.add('show'); btnA.classList.add('show');
+  // Reset ALL previous data on new scan
+  holeCards=[null,null]; boardCards=[]; opponents=1;
+  result.classList.remove('show');
+  cardEditor.classList.remove('show');
+  analysisText.textContent='';
+  winBarWrap.style.display='none';
+  winBar.style.width='0%';
 });
 
 btnR.addEventListener('click',()=>{
