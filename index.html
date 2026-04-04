@@ -418,7 +418,12 @@ function renderStats(p){
   if(p.handStrength){
     handStr.textContent=p.handStrength;
     const s=p.handStrength.toLowerCase();
-    handStr.className='stat-value '+(s.includes('premium')||s.includes('sehr stark')||s.includes('stark')?'green':s.includes('mittel')?'amber':'red');
+    const n=(p.handName||'').toLowerCase();
+    const isStrong = s.includes('sehr stark')||s.includes('stark')||s.includes('premium')||
+      n.includes('flush')||n.includes('straight')||n.includes('royal')||
+      n.includes('full')||n.includes('four')||n.includes('three')||n.includes('two pair');
+    const isMid = s.includes('mittel')||n.includes('pair');
+    handStr.className='stat-value '+(isStrong?'green':isMid?'amber':'red');
     handSub.textContent=p.handName||'';
   }
   oppsVal.textContent=p.opponents||opponents||'—';
