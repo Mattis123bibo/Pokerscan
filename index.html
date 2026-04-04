@@ -353,11 +353,12 @@ recalcBtn.addEventListener('click',()=>{
 
   const boardStr=validBoard.join(' ');
   const stage={0:'Preflop',3:'Flop',4:'Turn',5:'River'}[boardCount]||'Flop';
-  runAnalysis({image:b64,override:{myHand:myHandStr,board:boardStr,opponents:opponents,boardStage:stage}},false);
+  runAnalysis({image:b64||'',override:{myHand:myHandStr,board:boardStr,opponents:opponents,boardStage:stage}},false);
 });
 
 async function runAnalysis(body, isImageScan){
-  if(!body.image&&isImageScan){showErr('Erst Foto machen!');return;}
+  if(isImageScan&&!body.image){showErr('Erst Foto machen!');return;}
+  if(!isImageScan&&!body.override){showErr('Keine Karten eingegeben!');return;}
   if(mode==='analyzing')return;
   mode='analyzing'; setBadge('ANALYSIERE...','busy'); scan.classList.add('on');
   btnA.style.opacity='0.3'; btnA.style.pointerEvents='none';
