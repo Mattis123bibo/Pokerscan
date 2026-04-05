@@ -343,6 +343,14 @@ btnA.addEventListener('click',()=>runAnalysis({image:b64},true));
 
 recalcBtn.addEventListener('click',()=>{
   if(mode==='analyzing')return;
+  // Reset sofort — egal was kommt
+  winPct.textContent='—'; winPct.className='stat-value green';
+  winSub.textContent='equity';
+  handStr.textContent='—'; handSub.textContent='—';
+  oppsVal.textContent='—';
+  winBarWrap.style.display='none'; winBar.style.width='0%'; winBarPct.textContent='0%';
+  analysisText.textContent='';
+
   const myHandStr=holeCards.filter(Boolean).join(' ');
   const validBoard=boardCards.filter(Boolean);
   const boardCount=validBoard.length;
@@ -351,7 +359,7 @@ recalcBtn.addEventListener('click',()=>{
   if(!holeCards[0]||!holeCards[1]){showErr('Hole Cards unvollständig — bitte beide Karten eintragen!');return;}
   if(boardCount===1||boardCount===2){showErr('Ungültige Kartenanzahl — Board braucht 0 (Preflop), 3 (Flop), 4 (Turn) oder 5 (River) Karten!');return;}
 
-  const boardStr=validBoard.join(' ');
+  const boardStr=validBoard.filter(c=>c&&c!=='null'&&c!==null).join(' ');
   const stage={0:'Preflop',3:'Flop',4:'Turn',5:'River'}[boardCount]||'Flop';
   runAnalysis({image:b64||'',override:{myHand:myHandStr,board:boardStr,opponents:opponents,boardStage:stage}},false);
 });
@@ -375,7 +383,10 @@ async function runAnalysis(body, isImageScan){
   winBarWrap.style.display='none'; winBar.style.width='0%'; winBarPct.textContent='0%';
 
   try{
-    const res=await fetch(BACKEND_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const controller=new AbortController();
+    const timeout=setTimeout(()=>controller.abort(),90000);
+    const res=await fetch(BACKEND_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:controller.signal});
+    clearTimeout(timeout);
     if(!res.ok)throw new Error('Backend Fehler '+res.status);
     const parsed=await res.json();
     if(parsed.error)throw new Error(parsed.error);
@@ -485,7 +496,11 @@ function renderEditor(){
   if(boardCards.length<5){
     const addBtn=document.createElement('button');
     addBtn.className='add-card-btn'; addBtn.type='button'; addBtn.textContent='+ Karte';
-    addBtn.onclick=()=>{boardCards.push(null);renderEditor();openPicker('board',boardCards.length-1);};
+    addBtn.onclick=()=>{
+      const newIdx=boardCards.length;
+      boardCards.push(null);
+      openPicker('board',newIdx);
+    };
     boardRow.appendChild(addBtn);
   }
 
@@ -545,7 +560,17 @@ clearCardBtn.onclick=()=>{
 };
 modalClose.onclick=closePicker;
 modalBg.onclick=(e)=>{if(e.target===modalBg)closePicker();};
-function closePicker(){modalBg.classList.remove('show');currentEditTarget=null;}
+function closePicker(){
+  // If user cancels on a new card slot (null), remove it
+  if(currentEditTarget && currentEditTarget.type==='board'){
+    if(boardCards[currentEditTarget.idx]===null){
+      boardCards.splice(currentEditTarget.idx,1);
+      renderEditor();
+    }
+  }
+  modalBg.classList.remove('show');
+  currentEditTarget=null;
+}
 
 startCam();
 </script>
