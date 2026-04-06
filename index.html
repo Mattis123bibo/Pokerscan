@@ -325,18 +325,18 @@ btnS.addEventListener('click',()=>{
     let r=d[i], g=d[i+1], b=d[i+2];
     
     // Step 1: Reduce yellow tint (yellow = high R + high G, low B)
-    g=Math.min(255,g*0.88);  // Pull green down
-    b=Math.min(255,b*1.15);  // Push blue up
+    g=Math.min(255,g*0.93);  // Pull green down slightly
+    b=Math.min(255,b*1.08);  // Push blue up slightly
     
     // Step 2: Boost color saturation to make red POP vs black
     const avg=(r+g+b)/3;
-    const sat=2.0; // Strong saturation boost
+    const sat=1.5; // Moderate saturation boost
     r=Math.min(255,Math.max(0,avg+(r-avg)*sat));
     g=Math.min(255,Math.max(0,avg+(g-avg)*sat));
     b=Math.min(255,Math.max(0,avg+(b-avg)*sat));
     
     // Step 3: High contrast to separate dark (black symbols) from light (card background)
-    const contrast=1.4;
+    const contrast=1.25;
     r=Math.min(255,Math.max(0,(r-128)*contrast+128));
     g=Math.min(255,Math.max(0,(g-128)*contrast+128));
     b=Math.min(255,Math.max(0,(b-128)*contrast+128));
