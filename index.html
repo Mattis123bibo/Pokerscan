@@ -330,10 +330,21 @@ btnS.addEventListener('click',()=>{
     
     // Step 2: Boost color saturation to make red POP vs black
     const avg=(r+g+b)/3;
-    const sat=1.5; // Moderate saturation boost
+    const sat=1.5;
     r=Math.min(255,Math.max(0,avg+(r-avg)*sat));
     g=Math.min(255,Math.max(0,avg+(g-avg)*sat));
     b=Math.min(255,Math.max(0,avg+(b-avg)*sat));
+    
+    // Step 2b: Force dark pixels to pure black, bright to white
+    // This makes black symbols unambiguously black
+    const brightness=(r+g+b)/3;
+    if(brightness<80){
+      // Very dark = definitely black symbol
+      r=0; g=0; b=0;
+    } else if(brightness>200){
+      // Very bright = card background (white)
+      r=255; g=255; b=255;
+    }
     
     // Step 3: High contrast to separate dark (black symbols) from light (card background)
     const contrast=1.25;
