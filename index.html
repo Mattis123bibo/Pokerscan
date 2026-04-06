@@ -430,6 +430,12 @@ async function runAnalysis(body, isImageScan){
       holeCards=[h[0]||null,h[1]||null];
       boardCards=(parsed.board||'').match(/[AKQJT2-9]{1,2}[♠♥♦♣]/g)||[];
       opponents=parseInt(parsed.opponents)||1;
+      if(!h||h.length===0){
+        showErr('Keine Karten erkannt — bitte manuell eingeben oder neu fotografieren.');
+        cardEditor.classList.add('show');
+        renderEditor();
+        return;
+      }
     }
 
     const d=document.getElementById('sDot'),t=document.getElementById('sText');
